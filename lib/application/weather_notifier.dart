@@ -1,4 +1,4 @@
-import 'package:flutter_riverpod/all.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_statenotifier_tutorial/infrastructure/model/weather.dart';
 import 'package:riverpod_statenotifier_tutorial/infrastructure/weather_repository.dart';
 

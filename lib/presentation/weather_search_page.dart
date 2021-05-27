@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/all.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_statenotifier_tutorial/application/weather_notifier.dart';
 import 'package:riverpod_statenotifier_tutorial/infrastructure/model/weather.dart';
 import 'package:riverpod_statenotifier_tutorial/providers.dart';
@@ -20,7 +20,7 @@ class _WeatherSearchPageState extends State<WeatherSearchPage> {
         padding: EdgeInsets.symmetric(vertical: 16),
         alignment: Alignment.center,
         child: ProviderListener(
-          provider: weatherNotifierProvider.state,
+          provider: weatherNotifierProvider,
           onChange: (context, state) {
             if (state is WeatherError) {
               Scaffold.of(context).showSnackBar(
@@ -32,7 +32,7 @@ class _WeatherSearchPageState extends State<WeatherSearchPage> {
           },
           child: Consumer(
             builder: (context, watch, child) {
-              final state = watch(weatherNotifierProvider.state);
+              final state = watch(weatherNotifierProvider);
               if (state is WeatherInitial) {
                 return buildInitialInput();
               } else if (state is WeatherLoading) {
@@ -102,6 +102,6 @@ class CityInputField extends StatelessWidget {
   }
 
   void submitCityName(BuildContext context, String cityName) {
-    context.read(weatherNotifierProvider).getWeather(cityName);
+    context.read(weatherNotifierProvider.notifier).getWeather(cityName);
   }
 }
