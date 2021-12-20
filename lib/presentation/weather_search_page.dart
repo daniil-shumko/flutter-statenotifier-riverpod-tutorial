@@ -11,7 +11,7 @@ class WeatherSearchPage extends ConsumerWidget {
       weatherNotifierProvider,
       (previous, state) {
         if (state is WeatherError) {
-          Scaffold.of(context).showSnackBar(
+          ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(state.message),
             ),
