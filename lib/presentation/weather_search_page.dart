@@ -4,14 +4,21 @@ import 'package:riverpod_statenotifier_tutorial/application/weather_notifier.dar
 import 'package:riverpod_statenotifier_tutorial/infrastructure/model/weather.dart';
 import 'package:riverpod_statenotifier_tutorial/providers.dart';
 
-class WeatherSearchPage extends StatefulWidget {
+class WeatherSearchPage extends ConsumerWidget {
   @override
-  _WeatherSearchPageState createState() => _WeatherSearchPageState();
-}
-
-class _WeatherSearchPageState extends State<WeatherSearchPage> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    ref.listen<WeatherState>(
+      weatherNotifierProvider,
+      (previous, state) {
+        if (state is WeatherError) {
+          Scaffold.of(context).showSnackBar(
+            SnackBar(
+              content: Text(state.message),
+            ),
+          );
+        }
+      },
+    );
     return Scaffold(
       appBar: AppBar(
         title: Text("Weather Search"),
@@ -19,32 +26,20 @@ class _WeatherSearchPageState extends State<WeatherSearchPage> {
       body: Container(
         padding: EdgeInsets.symmetric(vertical: 16),
         alignment: Alignment.center,
-        child: ProviderListener(
-          provider: weatherNotifierProvider,
-          onChange: (context, state) {
-            if (state is WeatherError) {
-              Scaffold.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(state.message),
-                ),
-              );
+        child: Consumer(
+          builder: (context, ref, child) {
+            final state = ref.watch(weatherNotifierProvider);
+            if (state is WeatherInitial) {
+              return buildInitialInput();
+            } else if (state is WeatherLoading) {
+              return buildLoading();
+            } else if (state is WeatherLoaded) {
+              return buildColumnWithData(state.weather);
+            } else {
+              // (state is WeatherError)
+              return buildInitialInput();
             }
           },
-          child: Consumer(
-            builder: (context, watch, child) {
-              final state = watch(weatherNotifierProvider);
-              if (state is WeatherInitial) {
-                return buildInitialInput();
-              } else if (state is WeatherLoading) {
-                return buildLoading();
-              } else if (state is WeatherLoaded) {
-                return buildColumnWithData(state.weather);
-              } else {
-                // (state is WeatherError)
-                return buildInitialInput();
-              }
-            },
-          ),
         ),
       ),
     );
@@ -84,13 +79,13 @@ class _WeatherSearchPageState extends State<WeatherSearchPage> {
   }
 }
 
-class CityInputField extends StatelessWidget {
+class CityInputField extends ConsumerWidget {
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 50),
       child: TextField(
-        onSubmitted: (value) => submitCityName(context, value),
+        onSubmitted: (value) => submitCityName(ref, value),
         textInputAction: TextInputAction.search,
         decoration: InputDecoration(
           hintText: "Enter a city",
@@ -101,7 +96,7 @@ class CityInputField extends StatelessWidget {
     );
   }
 
-  void submitCityName(BuildContext context, String cityName) {
-    context.read(weatherNotifierProvider.notifier).getWeather(cityName);
+  void submitCityName(WidgetRef ref, String cityName) {
+    ref.read(weatherNotifierProvider.notifier).getWeather(cityName);
   }
 }
